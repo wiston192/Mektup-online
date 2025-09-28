@@ -1,1 +1,290 @@
-# Mektup-online
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bir mektubun var!</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --accent:#ef4444;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --card:#1f2937;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 70% -10%, #172554, var(--bg));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .card{
+      width:min(520px, 95vw);
+      background:linear-gradient(180deg, #0b1220, var(--panel));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45);
+      padding:22px 20px 18px;
+    }
+    h1{
+      font-size:22px;
+      margin:0 0 8px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      letter-spacing:.2px;
+    }
+    h1 svg{opacity:.9}
+    p.small{color:var(--muted); margin:0 0 12px; font-size:13px}
+    .row{display:flex; gap:10px; margin:10px 0}
+    input[type="text"], textarea{
+      width:100%;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      color:var(--text);
+      padding:12px 12px;
+      outline:none;
+      font-size:14px;
+    }
+    textarea{min-height:90px; resize:vertical}
+    button, .btn{
+      border:0;
+      padding:12px 14px;
+      border-radius:12px;
+      font-weight:600;
+      color:white;
+      background:linear-gradient(180deg, #f87171, var(--accent));
+      cursor:pointer;
+      transition:transform .05s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    button:active{transform:translateY(1px)}
+    .ghost{background:#263043; color:#d1d5db}
+    .qr-wrap{
+      background:var(--card);
+      border:1px dashed rgba(255,255,255,.15);
+      border-radius:16px;
+      padding:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .grid{display:grid; grid-template-columns:1fr; gap:12px}
+    .center{display:flex; justify-content:center}
+    .hide{display:none !important}
+    .footer{margin-top:12px; text-align:center; color:#94a3b8; font-size:12px}
+    /* Letter (view) */
+    .stage{position:relative; width:min(520px, 90vw); height:420px; display:flex; align-items:center; justify-content:center;}
+    .env{
+      position:relative; width:320px; height:220px; background:#ef4444; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      overflow:visible;
+    }
+    .env:before{
+      content:""; position:absolute; inset:0; background:
+        linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0) 60%);
+      border-radius:10px; mix-blend-mode:soft-light; opacity:.3; pointer-events:none;
+    }
+    .flap{
+      position:absolute; top:-2px; left:0; right:0; height:140px;
+      background:#f97316; clip-path: polygon(0 0, 100% 0, 50% 70%);
+      transform-origin: top center;
+      animation: open 1.4s ease forwards .4s;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.25));
+    }
+    @keyframes open{ 0%{transform:rotateX(0deg)} 100%{transform:rotateX(180deg)} }
+    .paper{
+      position:absolute; left:16px; right:16px; top:12px; height:150px; background:#f8fafc;
+      border-radius:8px; color:#0f172a; padding:16px; text-align:center; font-weight:600;
+      transform: translateY(90px); animation: rise 1.2s ease forwards 1s;
+      box-shadow:0 6px 12px rgba(0,0,0,.15);
+      display:flex; align-items:center; justify-content:center;
+    }
+    @keyframes rise{ from{ transform:translateY(90px); opacity:.1 } to{ transform:translateY(-10px); opacity:1 } }
+    .hearts{ position:absolute; inset:0; pointer-events:none; }
+    .heart{
+      position:absolute; width:14px; height:14px; background:#fb7185;
+      transform: rotate(45deg); animation: float 4s ease-in infinite;
+    }
+    .heart:before, .heart:after{
+      content:""; position:absolute; width:14px; height:14px; background:#fb7185; border-radius:50%;
+    }
+    .heart:before{ left:-7px; }
+    .heart:after{ top:-7px; }
+    @keyframes float{
+      0%{opacity:0; transform:translateY(0) rotate(45deg) scale(.8)}
+      20%{opacity:1}
+      100%{opacity:0; transform:translateY(-140px) rotate(45deg) scale(1.2)}
+    }
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1220;color:#e5e7eb;border:1px solid rgba(255,255,255,.1);padding:10px 14px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <div id="compose" class="card">
+    <h1>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 8l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/></svg>
+      Bir mektubun var!
+    </h1>
+    <p class="small">Aşağıya mesajını yaz, paylaşılabilir bağlantı ve QR kod oluştur.</p>
+
+    <div class="grid">
+      <textarea id="msg" placeholder="Mesajın..."></textarea>
+
+      <div class="row">
+        <button id="make">Bağlantı Oluştur</button>
+        <button id="random" class="ghost">Örnek mesaj</button>
+      </div>
+
+      <div id="shareArea" class="hide">
+        <p class="small">Bu linki paylaşabilirsin:</p>
+        <div class="row">
+          <input type="text" id="link" readonly />
+          <button id="copy">Kopyala</button>
+        </div>
+        <div class="row center">
+          <a id="wa" class="btn" target="_blank" rel="noopener">WhatsApp'ta Paylaş</a>
+        </div>
+
+        <p class="small">QR Kod ile paylaş:</p>
+        <div class="qr-wrap"><img id="qr" alt="QR Code" /></div>
+        <div class="row center">
+          <a id="downloadQR" class="btn ghost" download="qr.png">QR Kodunu indir</a>
+        </div>
+      </div>
+      <div class="footer">Yalnızca tarayıcı içinde çalışır • Sunucu gerektirmez</div>
+    </div>
+  </div>
+
+  <div id="view" class="hide">
+    <div class="stage">
+      <div class="env">
+        <div class="flap"></div>
+        <div class="paper" id="paperText"></div>
+        <div class="hearts" id="hearts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Kopyalandı ✓</div>
+
+  <script>
+    const byId = (id)=>document.getElementById(id);
+    function showToast(msg){
+      const t=byId('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1200);
+    }
+    function encodeMsg(s){ return encodeURIComponent(s); }
+    function decodeMsg(s){ try {return decodeURIComponent(s)} catch(e){return s} }
+    function randCode(n=6){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({length:n},()=>a[Math.floor(Math.random()*a.length)]).join(''); }
+    function randomMsg(){
+      const samples = [
+        "Yazılımcı olsam ne fayda, sana yazamadıktan sonra…",
+        "Bugün senin günün olsun 💫",
+        "Küçük bir not: Aklımdasın.",
+        "Bir kahve içer miyiz? ☕️",
+        "Gülüşünü düşündüm; yüzüme update geldi 😌"
+      ];
+      return samples[Math.floor(Math.random()*samples.length)];
+    }
+
+    // Robust copy that works even on file:// / content://
+    async function robustCopy(text){
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+          showToast("Kopyalandı ✓");
+          return true;
+        }
+      }catch(e){ /* fall through */ }
+      // Fallback
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=text;
+        ta.setAttribute('readonly','');
+        ta.style.position='fixed';
+        ta.style.top='-2000px';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        const ok=document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(ok){ showToast("Kopyalandı ✓"); return true; }
+      }catch(e){}
+      try{
+        // Ultimate fallback: open prompt so user can copy manually
+        window.prompt("Kopyalamak için Ctrl/Cmd+C → Enter", text);
+      }catch(e){ alert("Link: "+text); }
+      return false;
+    }
+
+    function makeLink(){
+      const m = byId('msg').value.trim();
+      if(!m){ alert("Önce bir mesaj yaz."); return; }
+      const code = randCode();
+      const url = new URL(window.location.href);
+      url.searchParams.set('m', encodeMsg(m));
+      url.searchParams.set('code', code);
+      const link = url.toString();
+      byId('link').value = link;
+      byId('shareArea').classList.remove('hide');
+
+      // WhatsApp
+      const waText = "Sana bir mektup gönderdim 💌 " + link;
+      byId('wa').href = "https://wa.me/?text=" + encodeURIComponent(waText);
+
+      // QR (uses public API)
+      const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=" + encodeURIComponent(link);
+      const qr = byId('qr');
+      qr.src = qrUrl;
+      byId('downloadQR').href = qrUrl;
+
+      byId('copy').onclick = () => robustCopy(link);
+    }
+
+    function showView(){
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get('m');
+      if(!m) return false;
+      byId('compose').classList.add('hide');
+      byId('view').classList.remove('hide');
+      const code = params.get('code') || randCode();
+      const text = decodeMsg(m);
+      byId('paperText').textContent = text;
+
+      const hearts = byId('hearts');
+      for(let i=0;i<12;i++){
+        const h = document.createElement('div');
+        h.className = 'heart';
+        h.style.left = (10 + Math.random()*80) + '%';
+        h.style.bottom = (5 + Math.random()*8) + 'px';
+        h.style.animationDelay = (Math.random()*3)+'s';
+        h.style.opacity = 0;
+        hearts.appendChild(h);
+      }
+      document.title = "Mektup • " + code;
+      return true;
+    }
+
+    // Init
+    (function(){
+      if(!showView()){
+        byId('make').addEventListener('click', makeLink);
+        byId('random').addEventListener('click', ()=>{
+          byId('msg').value = randomMsg();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
